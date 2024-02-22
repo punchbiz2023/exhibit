@@ -606,7 +606,7 @@
                         </button>
                         <input type="range" min="0" max="1" step="any" />
                         <div class="video-timer">
-                          <p class="current-time">18:00:56</p>
+                          <p class="current-time">00:00:00</p>
                           <p class="separator">/</p>
                           <p class="video-duration">00:00</p>
                         </div>
@@ -663,9 +663,10 @@
 
     <script>
 	  let time = parseInt("{{time}}")
+    let duration = parseInt("{{duration}}")
       const startingTimeInSeconds=time;
-     const endingTimeInSeconds=time;
-
+     const endingTimeInSeconds=time+duration;
+     
       $(function () {
               $('[data-toggle="tooltip"]').tooltip();
              });
@@ -705,12 +706,12 @@
               }
               return `${hours}:${minutes}:${seconds}`;
             };
-			
+            console.log(duration)
             videoTimeline.addEventListener("mousemove", (e) => {
               let timelineWidth = videoTimeline.clientWidth;
               let offsetX = e.offsetX;
               let percent = Math.floor(
-                (offsetX / timelineWidth) * mainVideo.duration
+                (offsetX / timelineWidth) * duration
               );
               const progressTime = videoTimeline.querySelector("span");
               offsetX =
@@ -726,7 +727,7 @@
             videoTimeline.addEventListener("click", (e) => {
               let timelineWidth = videoTimeline.clientWidth;
               mainVideo.currentTime =
-                (e.offsetX / timelineWidth) * mainVideo.duration;
+                (e.offsetX / timelineWidth) * duration;
             });
 
             mainVideo.addEventListener("timeupdate", (e) => {
@@ -737,14 +738,14 @@
             });
 
             mainVideo.addEventListener("loadeddata", () => {
-              videoDuration.innerText = formatTime(mainVideo.duration+time);
+              videoDuration.innerText = formatTime(duration+time);
             });
 
             const draggableProgressBar = (e) => {
               let timelineWidth = videoTimeline.clientWidth;
               progressBar.style.width = `${e.offsetX}px`;
               mainVideo.currentTime =
-                (e.offsetX / timelineWidth) * mainVideo.duration;
+                (e.offsetX / timelineWidth) * duration;
               currentVidTime.innerText = formatTime(mainVideo.currentTime+time);
             };
 
