@@ -193,13 +193,19 @@ def post_createcsv(request):
     
     # Open the video file
     cap = cv2.VideoCapture(video_path)
-    
+    # Get total frames and frame rate
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+
+    # Calculate video duration in seconds
+    video_duration_seconds = int(total_frames / fps)
+    print("Video Duration = ",video_duration_seconds)
     # Process the frames
     #stop_processing = False
     # Define the time pattern
-    time_pattern = re.compile(r'\b\d{2}\.\d{2}\.\d{2}\b')
+    time_pattern = re.compile(r'\b\d{2}\:\d{2}\:\d{2}\b')
     def time_to_seconds(time_str):
-        hours, minutes, seconds = map(int, time_str.split('.'))
+        hours, minutes, seconds = map(int, time_str.split(':'))
         total_seconds = hours * 3600 + minutes * 60 + seconds
         return total_seconds
     for frame_count in range(100):
@@ -207,10 +213,16 @@ def post_createcsv(request):
         ret, frame = cap.read()
         # Perform OCR on the frame
         results = reader.readtext(frame, detail = 0)
-        
+        """
         # Print OCR results
+        # Extract time-like strings from the result
+        text = [time for time in result if re.match(time_pattern, time)]
+
+        # Print extracted times
+        print("Extracted times:", text)
+        """
         if any(results):
-            text = results[1]
+            text = results[2]
              
              # Check if the desired time pattern is found
             if time_pattern.search(text):
@@ -218,8 +230,9 @@ def post_createcsv(request):
                 # Set the flag to stop processing
                 #stop_processing = True
                 break
+        
     total_seconds = time_to_seconds(text)
-    time1= text.split(".")
+    time1= text.split(":")
     hours = time1[0]
     minutes = time1[1]
     seconds = time1[2]
@@ -228,7 +241,7 @@ def post_createcsv(request):
     cap.release()
     
 
-    return render(request, 'videopage.html', {'i': video_url,'e':csv_url,'time':int(total_seconds),'hr':int(hours),'min':int(minutes),'sec':int(seconds),})
+    return render(request, 'videopage.html', {'i': video_url,'e':csv_url,'time':int(total_seconds),'hr':int(hours),'min':int(minutes),'sec':int(seconds),'duration':int(video_duration_seconds),})
 
 def crop(request):
 
